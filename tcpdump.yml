@@ -1,0 +1,40 @@
+- hosts: all
+
+  vars:
+      cap_file: packet_capture_{{ ansible_hostname }}_{{ ansible_date_time['epoch'] }}.pcap
+
+
+  vars_prompt:
+    - name: dur_in_sec
+      prompt: Please specify the runtime duration in sec
+      private: no
+
+    - name: interface
+      prompt: Please specify the interface (e.g. eth0)
+      private: no
+    
+    - name: dest_folder
+      prompt: Please specify the destination folder (location on remote server e.g. /var/tmp/)
+      private: no
+
+    - name: filter
+      prompt: Please specify the tcpdump filter (e.g. host 10.10.10.10). For no filter just press enter
+      default: ""
+      private: no
+
+ 
+  tasks:
+    - name: start tcpdump
+      command: sudo /usr/sbin/tcpdump -G {{ dur_in_sec }} -W 1 -i {{ interface }} -s 0 -w {{ dest_folder}}/{{ cap_file }} {{ filter }}
+ 
+    - name: compress capture file
+      command: sudo gzip {{cap_file}} chdir={{ dest_folder}}/
+ 
+    - name: Change file permission
+      command: sudo chmod 755 {{ dest_folder}}/{{cap_file}}.gz
+
+    - name: copy logs to /export/tmp/ansible/
+      fetch: src={{ dest_folder}}/{{cap_file}}.gz dest=/export/tmp/ansible/ flat=yes
+
+    - name: remove files from remote server
+      command: sudo rm -rf {{ dest_folder}}/{{cap_file}}.gz 

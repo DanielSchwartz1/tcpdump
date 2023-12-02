@@ -1,5 +1,5 @@
 # Daniel Schwartz
-# Version 1.0.0
+# Version 1.0.1
 # Ansible Playbook
 - hosts: all
 
@@ -40,4 +40,4 @@
       fetch: src={{ dest_folder}}/{{cap_file}}.gz dest=/export/tmp/ansible/ flat=yes
 
     - name: remove files from remote server
-      command: sudo rm -rf {{ dest_folder}}/{{cap_file}}.gz 
+      command: sudo rm -r {{ dest_folder}}/{{cap_file}}.gz 
